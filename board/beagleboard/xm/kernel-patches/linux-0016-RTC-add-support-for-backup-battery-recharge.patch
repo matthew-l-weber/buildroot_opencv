@@ -1,19 +1,14 @@
-From 6875044da02daa3653d244b80e93ecc56345e89c Mon Sep 17 00:00:00 2001
-From: Max Galemin <maksim.galemin@gmail.com>
-Date: Mon, 30 May 2011 08:29:52 +1000
-Subject: [PATCH 7/7] Issue 6: added support for RTC backup battery recharge.
+From 6f432e1e39f276a41d600d1cc9cd17fc088877d8 Mon Sep 17 00:00:00 2001
+From: Steve Sakoman <steve@sakoman.com>
+Date: Thu, 4 Feb 2010 12:26:22 -0800
+Subject: [PATCH 16/32] RTC: add support for backup battery recharge
 
-Not related to Issue 6 item. For details plese see
-
-http://dominion.thruhere.net/git/cgit.cgi/linux-omap/log/?h=beagle-2.6.39.
-
-1. Applied patch "RTC: add support for backup battery recharge" (Steve Sakoman <steve@sakoman.com>).
 ---
  drivers/rtc/rtc-twl.c |   25 +++++++++++++++++++++++++
  1 files changed, 25 insertions(+), 0 deletions(-)
 
 diff --git a/drivers/rtc/rtc-twl.c b/drivers/rtc/rtc-twl.c
-index f9a2799..c617a27 100644
+index f9a2799..713b8ea 100644
 --- a/drivers/rtc/rtc-twl.c
 +++ b/drivers/rtc/rtc-twl.c
 @@ -30,6 +30,23 @@
@@ -23,7 +18,7 @@ index f9a2799..c617a27 100644
 +/*
 + * PM_RECEIVER block register offsets (use TWL4030_MODULE_PM_RECEIVER)
 + */
-+#define REG_BB_CFG                              0x12
++#define REG_BB_CFG	0x12
 +
 +/* PM_RECEIVER  BB_CFG bitfields */
 +#define BIT_PM_RECEIVER_BB_CFG_BBCHEN           0x10
@@ -56,5 +51,5 @@ index f9a2799..c617a27 100644
  
  out2:
 -- 
-1.7.4.1
+1.6.6.1
 

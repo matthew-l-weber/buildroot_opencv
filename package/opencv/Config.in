@@ -6,6 +6,18 @@ config BR2_PACKAGE_OPENCV
 
 	  http://opencv.willowgarage.com/
 
+config BR2_PACKAGE_OPENCV_EXAMPLES
+	bool "Example Programs"
+	depends on BR2_PACKAGE_OPENCV
+	help
+	  Build and install the OpenCV example programs
+
+config BR2_PACKAGE_OPENCV_TESTS
+	bool "Test Programs"
+	depends on BR2_PACKAGE_OPENCV
+	help
+	  Build and install the OpenCV test programs
+
 config BR2_PACKAGE_OPENCV_JPEG
 	bool "JPEG support"
 	depends on BR2_PACKAGE_OPENCV
@@ -73,17 +85,11 @@ comment "OpenCV GTK+ 2 support depends on GTK+ 2"
 	depends on BR2_PACKAGE_OPENCV
 	depends on !BR2_PACKAGE_LIBGTK2
 
-config BR2_PACKAGE_OPENCV_LIBV4L
+config BR2_PACKAGE_OPENCV_V4L
 	bool "V4L support"
 	depends on BR2_PACKAGE_OPENCV
-	depends on BR2_PACKAGE_LIBV4L
 	help
 	  Enable V4L (v4l2 - video for linux 2) support for OpenCV. 
-	  This requires V4L library.
-
-comment "OpenCV V4L support depends on V4L library"
-	depends on BR2_PACKAGE_OPENCV
-	depends on !BR2_PACKAGE_LIBV4L
 
 config BR2_PACKAGE_OPENCV_PYTON
 	bool "Python language support"

@@ -1,0 +1,12 @@
+--- a/modules/ml/src/gbt.cpp	2010-12-04 21:35:25.000000000 -0600
++++ b/modules/ml/src/gbt.cpp	2011-08-01 06:58:49.068722945 -0500
+@@ -11,9 +11,7 @@
+ #define CV_CMP_FLOAT(a,b) ((a) < (b))
+ static CV_IMPLEMENT_QSORT_EX( icvSortFloat, float, CV_CMP_FLOAT, float)
+ 
+-#if ANDROID
+ #define expl(x) exp(x)
+-#endif
+ 
+ //===========================================================================
+ string ToString(int i)

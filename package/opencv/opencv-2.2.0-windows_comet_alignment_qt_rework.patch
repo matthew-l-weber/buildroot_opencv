@@ -1,0 +1,424 @@
+diff -uN output/build/opencv-2.2.0/modules/highgui/src/window_QT.cpp output/build/opencv-2.2.0-changes/modules/highgui/src/window_QT.cpp
+--- a/modules/highgui/src/window_QT.cpp	2011-11-03 08:37:15.000000000 -0500
++++ b/modules/highgui/src/window_QT.cpp	2011-11-10 07:34:16.000000000 -0600
+@@ -1,4 +1,14 @@
+-//IMPORTANT: READ BEFORE DOWNLOADING, COPYING, INSTALLING OR USING. 
++/******************************************************************************
++ * © Copyright 2011, Rockwell Collins.  All rights reserved.
++ *
++ * Information contained herein is privileged or confidential information
++ * of Rockwell Collins within the meaning of 5 USC 552, and as such
++ * is exempt from the public disclosure provisions thereof.
++ *
++ * Security classification: UNCLASSIFIED
++ *
++ *****************************************************************************/
++ //IMPORTANT: READ BEFORE DOWNLOADING, COPYING, INSTALLING OR USING. 
+ 
+ // By downloading, copying, installing or using the software you agree to this license.
+ // If you do not agree to this license, do not download, install,
+@@ -1616,7 +1626,7 @@
+ 
+ void CvWindow::createActions()
+ {
+-	vect_QActions.resize(10);
++	vect_QActions.resize(11);
+ 
+ 	//if the shortcuts are changed in window_QT.h, we need to update the tooltip manually
+ 	vect_QActions[0] = new QAction(QIcon(":/left-icon"),"Panning left (CTRL+arrowLEFT)",this);
+@@ -1635,7 +1645,7 @@
+ 	vect_QActions[3]->setIconVisibleInMenu(true);
+ 	QObject::connect( vect_QActions[3],SIGNAL(triggered()),myview, SLOT( siftWindowOnDown() ));
+ 
+-	vect_QActions[4] = new QAction(QIcon(":/zoom_x1-icon"),"Zoom x1 (CTRL+P)",this);
++	vect_QActions[4] = new QAction(QIcon(":/zoom_x1-icon"),"Zoom x1 (CTRL+Z)",this);
+ 	vect_QActions[4]->setIconVisibleInMenu(true);
+ 	QObject::connect( vect_QActions[4],SIGNAL(triggered()),myview, SLOT( resetZoom() ));
+ 
+@@ -1660,6 +1670,10 @@
+ 	vect_QActions[9] = new QAction(QIcon(":/properties-icon"),tr("Display properties window (CTRL+P)"),this);
+ 	vect_QActions[9]->setIconVisibleInMenu(true);
+ 	QObject::connect( vect_QActions[9],SIGNAL(triggered()),this, SLOT( displayPropertiesWin() ));
++	
++	vect_QActions[10] = new QAction(QIcon(":/view_compressed-icon"),"View Compresed full image (CTRL+C)",this);
++	vect_QActions[10]->setIconVisibleInMenu(true);
++	QObject::connect( vect_QActions[10],SIGNAL(triggered()),myview, SLOT( viewCompressedImage() ));
+ 
+ 	if (global_control_panel->myLayout->count() == 0)
+ 		vect_QActions[9]->setDisabled(true);
+@@ -1668,7 +1682,7 @@
+ 
+ void CvWindow::createShortcuts()
+ {
+-	vect_QShortcuts.resize(10);
++	vect_QShortcuts.resize(11);
+ 
+ 	vect_QShortcuts[0] = new QShortcut(shortcut_panning_left, this);
+ 	QObject::connect( vect_QShortcuts[0], SIGNAL( activated ()),myview, SLOT( siftWindowOnLeft() ));
+@@ -1691,6 +1705,8 @@
+ 	QObject::connect( vect_QShortcuts[8], SIGNAL( activated ()),myview, SLOT( saveView( ) ));
+ 	vect_QShortcuts[9] = new QShortcut(shortcut_properties_win, this);
+ 	QObject::connect( vect_QShortcuts[9], SIGNAL( activated ()),this, SLOT( displayPropertiesWin() ));
++	vect_QShortcuts[10] = new QShortcut(shortcut_view_compressed, this);
++	QObject::connect( vect_QShortcuts[10], SIGNAL( activated ()),myview, SLOT( viewCompressedImage( ) ));
+ }
+ 
+ void CvWindow::createToolBar()
+@@ -2123,6 +2139,7 @@
+ 	timerDisplay->setSingleShot(true);
+ 	connect(timerDisplay, SIGNAL(timeout()), this, SLOT(stopDisplayInfo()));
+ 	drawInfo = false;
++	viewCompressed = false;
+ 	positionGrabbing = QPointF(0,0);
+ 	positionCorners = QRect(0,0,size().width(),size().height());
+ 	on_mouse = NULL;
+@@ -2130,7 +2147,7 @@
+ 	on_openGL_draw3D = NULL;
+ 
+ 	//no border
+-	setStyleSheet( "QGraphicsView { border-style: none; }" ); 
++	setStyleSheet( "QGraphicsView { border-style: none; background: rgb(150, 200, 255); }" ); 
+ 
+ #if defined( HAVE_QT_OPENGL )
+ 	
+@@ -2219,35 +2236,33 @@
+ #if defined( HAVE_QT_OPENGL )
+ 		image2Draw_qt_resized = ((QGLWidget*)viewport())->grabFrameBuffer();
+ #else
+-		//   (no need anymore) create the image resized to receive the 'screenshot'
+-		//    image2Draw_qt_resized = QImage(viewport()->width(), viewport()->height(),QImage::Format_RGB888);
+-		
+-		QPainter saveimage(&image2Draw_qt_resized);
++		// Save the full sized (uncompressed) image
++		QPainter saveimage(&image2Draw_qt);
+ 		this->render(&saveimage);
+ #endif
+ 
+ 		// Save it..
+ 		if (QString::compare(extension, "png", Qt::CaseInsensitive) == 0)
+ 		{
+-			image2Draw_qt_resized.save(fileName, "PNG");
++			image2Draw_qt.save(fileName, "PNG");
+ 			return;
+ 		}
+ 
+ 		if (QString::compare(extension, "jpg", Qt::CaseInsensitive) == 0)
+ 		{
+-			image2Draw_qt_resized.save(fileName, "JPG");
++			image2Draw_qt.save(fileName, "JPG");
+ 			return;
+ 		}
+ 
+ 		if (QString::compare(extension, "bmp", Qt::CaseInsensitive) == 0)
+ 		{
+-			image2Draw_qt_resized.save(fileName, "BMP");
++			image2Draw_qt.save(fileName, "BMP");
+ 			return;
+ 		}
+ 
+ 		if (QString::compare(extension, "jpeg", Qt::CaseInsensitive) == 0)
+ 		{
+-			image2Draw_qt_resized.save(fileName, "JPEG");
++			image2Draw_qt.save(fileName, "JPEG");
+ 			return;
+ 		}
+ 
+@@ -2279,6 +2294,11 @@
+ 	controlImagePosition();
+ }
+ 
++void ViewPort::viewCompressedImage()
++{
++	viewCompressed = !viewCompressed;
++}
++
+ void ViewPort::ZoomIn()
+ {
+ 	scaleView( 0.5,QPointF(size().width()/2,size().height()/2));
+@@ -2340,8 +2360,6 @@
+ 
+ void ViewPort::updateImage(const CvArr *arr)
+ {
+-	//if (!arr)
+-	//CV_Error(CV_StsNullPtr, "NULL arr pointer (in showImage)" );
+ 	CV_Assert(arr);
+ 
+ 	CvMat * mat, stub;
+@@ -2352,8 +2370,6 @@
+ 
+ 	mat = cvGetMat(arr, &stub);
+ 
+-	//IplImage* tempImage = (IplImage*)arr;
+-
+ 	if( CV_IS_IMAGE_HDR( arr ))
+ 		origin = ((IplImage*)arr)->origin;
+ 
+@@ -2415,6 +2431,9 @@
+ }
+ #endif
+ 
++/* (cls) not checking the image size to ensure the image is pannable around the entire image
++ *       leave commented out code to add panning limits back in
++ */
+ void ViewPort::controlImagePosition()
+ {
+ 	qreal left, top, right, bottom;
+@@ -2422,7 +2441,7 @@
+ 	//after check top-left, bottom right corner to avoid getting "out" during zoom/panning
+ 	param_matrixWorld.map(0,0,&left,&top);
+ 
+-	if (left > 0)
++/*	if (left > 0)
+ 	{
+ 		param_matrixWorld.translate(-left,0);
+ 		left = 0;
+@@ -2432,28 +2451,28 @@
+ 		param_matrixWorld.translate(0,-top);
+ 		top = 0;
+ 	}
++*/
+ 	//-------
+ 
+ 	QSize sizeImage = size();
+ 	param_matrixWorld.map(sizeImage.width(),sizeImage.height(),&right,&bottom);
+-	if (right < sizeImage.width())
++/*	if (right < sizeImage.width()-sizeImage.width()*param_matrixWorld.m11())
+ 	{
+-		param_matrixWorld.translate(sizeImage.width()-right,0);
++		param_matrixWorld.translate(sizeImage.width()-(sizeImage.width()*param_matrixWorld.m11())-right,0);
+ 		right = sizeImage.width();
+ 	}
+-	if (bottom < sizeImage.height())
++	if (bottom < sizeImage.height()-sizeImage.height()*param_matrixWorld.m22())
+ 	{
+-		param_matrixWorld.translate(0,sizeImage.height()-bottom);
++		param_matrixWorld.translate(0,sizeImage.height()-(sizeImage.height()*param_matrixWorld.m22())-bottom);
+ 		bottom = sizeImage.height();
+ 	}
++*/
+ 
+ 	//save corner position
+ 	positionCorners.setTopLeft(QPoint(left,top));
+ 	positionCorners.setBottomRight(QPoint(right,bottom));
+ 	//save also the inv matrix
+ 	matrixWorld_inv = param_matrixWorld.inverted();
+-
+-	//viewport()->update();
+ }
+ 
+ void ViewPort::moveView(QPointF delta)
+@@ -2502,7 +2521,7 @@
+ 
+ void ViewPort::wheelEvent(QWheelEvent *event)
+ {
+-	scaleView( -event->delta() / 240.0,event->pos());
++	scaleView( event->delta() / 240.0,event->pos());
+ 	viewport()->update();
+ }
+ 
+@@ -2515,11 +2534,8 @@
+ 	icvmouseHandler(event, mouse_down, cv_event, flags);
+ 	icvmouseProcessing(QPointF(pt), cv_event, flags);
+ 
+-	if (param_matrixWorld.m11()>1)
+-	{
+-		setCursor(Qt::ClosedHandCursor);
+-		positionGrabbing = event->pos();
+-	}
++	setCursor(Qt::ClosedHandCursor);
++	positionGrabbing = event->pos();
+ 
+ 	QWidget::mousePressEvent(event);
+ }
+@@ -2533,8 +2549,7 @@
+ 	icvmouseHandler(event, mouse_up, cv_event, flags);
+ 	icvmouseProcessing(QPointF(pt), cv_event, flags);
+ 
+-	if (param_matrixWorld.m11()>1)
+-		setCursor(Qt::OpenHandCursor);
++	setCursor(Qt::OpenHandCursor);
+ 
+ 	QWidget::mouseReleaseEvent(event);
+ }
+@@ -2560,7 +2575,7 @@
+ 	icvmouseHandler(event, mouse_move, cv_event, flags);
+ 	icvmouseProcessing(QPointF(pt), cv_event, flags);
+ 
+-	if (param_matrixWorld.m11()>1 && event->buttons() == Qt::LeftButton)
++	if (event->buttons() == Qt::LeftButton)
+ 	{
+ 		QPointF dxy = (pt - positionGrabbing)/param_matrixWorld.m11();
+ 		positionGrabbing = event->pos();
+@@ -2645,8 +2660,8 @@
+ 	qreal pfx, pfy;
+ 	matrixWorld_inv.map(pt.x(),pt.y(),&pfx,&pfy);
+ 	
+-	mouseCoordinate.rx()=floor(pfx/ratioX);
+-	mouseCoordinate.ry()=floor(pfy/ratioY);
++	mouseCoordinate.rx()=floor(pfx);
++	mouseCoordinate.ry()=floor(pfy);
+ 
+ 	if (on_mouse)
+ 		on_mouse( cv_event, mouseCoordinate.x(),
+@@ -2725,19 +2740,17 @@
+ 	//Now disable matrixWorld for overlay display
+ 	myPainter.setWorldMatrixEnabled (false );
+ 
+-	//in mode zoom/panning
+-	if (param_matrixWorld.m11()>1)
++	drawViewOverview(&myPainter);
++
++	if(viewCompressed)
+ 	{
++		image2Draw_qt_resized = image2Draw_qt.scaled(viewport()->width(),viewport()->height(),Qt::KeepAspectRatio,Qt::FastTransformation);
++		myPainter.drawImage(0,0,image2Draw_qt_resized);
+ 		
+-		if (param_matrixWorld.m11()>=threshold_zoom_img_region)
+-		{
+-			if (centralWidget->param_flags == CV_WINDOW_NORMAL)
+-				startDisplayInfo("WARNING: The values displayed are the resized image's values. If you want the original image's values, use CV_WINDOW_AUTOSIZE", 1000);
+-
+-			drawImgRegion(&myPainter);
+-		}
+-
+-		drawViewOverview(&myPainter);
++		//Draw crosshairs over the image
++		myPainter.setPen(Qt::yellow);
++		myPainter.drawLine(image2Draw_qt_resized.width()/2, 0, image2Draw_qt_resized.width()/2, image2Draw_qt_resized.height());
++		myPainter.drawLine(0, image2Draw_qt_resized.height()/2, image2Draw_qt_resized.width(), image2Draw_qt_resized.height()/2);
+ 	}
+ 
+ 	//for information overlay
+@@ -2754,8 +2767,12 @@
+ void ViewPort::draw2D(QPainter *painter)
+ {
+ 	image2Draw_qt = QImage(image2Draw_mat->data.ptr, image2Draw_mat->cols, image2Draw_mat->rows,image2Draw_mat->step,QImage::Format_RGB888);
+-	image2Draw_qt_resized = image2Draw_qt.scaled(viewport()->width(),viewport()->height(),Qt::IgnoreAspectRatio,Qt::FastTransformation);//Qt::SmoothTransformation);
+-	painter->drawImage(0,0,image2Draw_qt_resized);
++	painter->drawImage(0,0,image2Draw_qt);
++	
++	//Draw crosshairs over the image
++	painter->setPen(Qt::yellow);
++	painter->drawLine(image2Draw_qt.width()/2, 0, image2Draw_qt.width()/2, image2Draw_qt.height());
++	painter->drawLine(0, image2Draw_qt.height()/2, image2Draw_qt.width(), image2Draw_qt.height()/2);
+ }
+ 
+ //only if CV_8UC1 or CV_8UC3
+@@ -2894,23 +2911,33 @@
+ void ViewPort::drawViewOverview(QPainter *painter)
+ {
+ 	QSize viewSize = size();
+-	viewSize.scale ( 100, 100,Qt::KeepAspectRatio );
+-
++	QSize imgSize = image2Draw_qt.size();
++	imgSize.scale( 100, 100,Qt::KeepAspectRatio );
++	qreal scalingFactor = (qreal)(imgSize.width())/(qreal)(image2Draw_qt.width());
++	viewSize.setWidth((int)(viewSize.width()*scalingFactor));
++	viewSize.setHeight((int)(viewSize.height()*scalingFactor));
++	
+ 	const int margin = 5;
+ 
+ 	//draw the image's location
+ 	painter->setBrush(QColor(0, 0, 0, 127));
+ 	painter->setPen(Qt::darkGreen);
+-	painter->drawRect(QRect(width()-viewSize.width()-margin, 0,viewSize.width(),viewSize.height()));
+-
++	painter->drawRect(QRect(width()-imgSize.width()-margin, margin,imgSize.width(),imgSize.height()));
++	
++	//Draw the crosshairs
++	painter->setPen(Qt::red);
++	painter->drawLine(width()-imgSize.width()-margin, imgSize.height()/2+margin, width()-margin, imgSize.height()/2+margin);
++	painter->drawLine(width()-imgSize.width()/2-margin, margin, width()-imgSize.width()/2-margin, imgSize.height()+margin);
++	
+ 	//daw the view's location inside the image
+ 	qreal ratioSize = 1/param_matrixWorld.m11();
+ 	qreal ratioWindow = (qreal)(viewSize.height())/(qreal)(size().height());
++	
+ 	painter->setPen(Qt::darkBlue);
+-	painter->drawRect(QRectF(width()-viewSize.width()-positionCorners.left()*ratioSize*ratioWindow-margin,
+-		-positionCorners.top()*ratioSize*ratioWindow,
+-		(viewSize.width()-1)*ratioSize,
+-		(viewSize.height()-1)*ratioSize)
++	painter->drawRect(QRectF(width()-imgSize.width()-(positionCorners.left()*ratioSize*ratioWindow)-margin,
++		-positionCorners.top()*ratioSize*ratioWindow+margin,
++		(viewSize.width())*ratioSize,
++		(viewSize.height())*ratioSize)
+ 		);
+ }
+ 
+@@ -2993,3 +3020,9 @@
+ #endif
+ 
+ #endif
++
++/******************************************************************************
++ *
++ * Security classification:  UNCLASSIFIED
++ *
++ *****************************************************************************/
+diff -uN output/build/opencv-2.2.0/modules/highgui/src/window_QT.h output/build/opencv-2.2.0-changes/modules/highgui/src/window_QT.h
+--- a/modules/highgui/src/window_QT.h	2011-11-02 17:39:15.000000000 -0500
++++ b/modules/highgui/src/window_QT.h	2011-11-02 17:53:16.092648790 -0500
+@@ -1,4 +1,14 @@
+-//IMPORTANT: READ BEFORE DOWNLOADING, COPYING, INSTALLING OR USING. 
++/******************************************************************************
++ * © Copyright 2011, Rockwell Collins.  All rights reserved.
++ *
++ * Information contained herein is privileged or confidential information
++ * of Rockwell Collins within the meaning of 5 USC 552, and as such
++ * is exempt from the public disclosure provisions thereof.
++ *
++ * Security classification: UNCLASSIFIED
++ *
++ *****************************************************************************/
++ //IMPORTANT: READ BEFORE DOWNLOADING, COPYING, INSTALLING OR USING. 
+ 
+ // By downloading, copying, installing or using the software you agree to this license.
+ // If you do not agree to this license, do not download, install,
+@@ -93,7 +103,8 @@
+ 		shortcut_panning_left 	= Qt::CTRL + Qt::Key_Left,
+ 		shortcut_panning_right 	= Qt::CTRL + Qt::Key_Right,
+ 		shortcut_panning_up 	= Qt::CTRL + Qt::Key_Up,
+-		shortcut_panning_down 	= Qt::CTRL + Qt::Key_Down
++		shortcut_panning_down 	= Qt::CTRL + Qt::Key_Down,
++		shortcut_view_compressed 	= Qt::CTRL + Qt::Key_C
+ 	};
+ 
+ 
+@@ -393,6 +404,7 @@
+     void imgRegion();
+     void moveView(QPointF delta);
+     void resetZoom();
++    void viewCompressedImage();
+     void ZoomIn();
+     void ZoomOut();
+     void siftWindowOnLeft();
+@@ -424,6 +436,7 @@
+     QPointer<CvWindow> centralWidget;
+     QPointer<QTimer> timerDisplay;
+     bool drawInfo;
++    bool viewCompressed;
+     QString infoText;
+ 	QRectF target;
+     //QImage* image;
+@@ -460,3 +473,9 @@
+ };
+ 
+ #endif
++
++/******************************************************************************
++ *
++ * Security classification:  UNCLASSIFIED
++ *
++ *****************************************************************************/
+diff -uN output/build/opencv-2.2.0/modules/highgui/src/window_QT.qrc output/build/opencv-2.2.0-changes/modules/highgui/src/window_QT.qrc
+--- a/modules/highgui/src/window_QT.qrc	2011-11-02 17:39:14.000000000 -0500
++++ b/modules/highgui/src/window_QT.qrc	2011-11-02 17:53:14.992738696 -0500
+@@ -4,6 +4,7 @@
+         <file alias="right-icon">files_Qt/Milky/48/23.png</file>
+         <file alias="up-icon">files_Qt/Milky/48/19.png</file>
+         <file alias="down-icon">files_Qt/Milky/48/24.png</file>
++        <file alias="view_compressed-icon">files_Qt/Milky/48/63.png</file>
+         <file alias="zoom_x1-icon">files_Qt/Milky/48/27.png</file>
+         <file alias="imgRegion-icon">files_Qt/Milky/48/61.png</file>
+         <file alias="zoom_in-icon">files_Qt/Milky/48/106.png</file>

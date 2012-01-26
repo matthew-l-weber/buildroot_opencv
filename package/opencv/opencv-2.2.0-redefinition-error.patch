@@ -1,0 +1,11 @@
+--- a/modules/core/include/opencv2/core/types_c.h	2010-12-04 21:35:24.000000000 -0600
++++ b/modules/core/include/opencv2/core/types_c.h	2011-10-17 11:13:44.000000000 -0500
+@@ -152,7 +152,7 @@
+ 
+ #ifndef HAVE_IPL
+ typedef unsigned char uchar;
+-typedef unsigned short ushort;
++// (cls) typedef unsigned short ushort;
+ #endif
+ 
+ typedef signed char schar;

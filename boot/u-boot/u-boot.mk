@@ -143,7 +143,8 @@ $(BINARIES_DIR)/$(U_BOOT_BIN): $(U_BOOT_DIR)/$(U_BOOT_BIN)
 	cp -dpf $(U_BOOT_DIR)/$(U_BOOT_BIN) $(BINARIES_DIR)/
 ifeq ($(BR2_TARGET_UBOOT_DEFAULT_UENV),y)
 	rm -f $(BINARIES_DIR)/$(U_BOOT_UENV_FILE)
-	echo "mpurate=1000" >> $(BINARIES_DIR)/$(U_BOOT_UENV_FILE)
+	echo "mpurate=auto" >> $(BINARIES_DIR)/$(U_BOOT_UENV_FILE)
+	echo "bootdelay=1" >> $(BINARIES_DIR)/$(U_BOOT_UENV_FILE)
 	echo "uenvcmd=mmc init; run loaduimage; run mmcboot" >> $(BINARIES_DIR)/$(U_BOOT_UENV_FILE)
 endif
 

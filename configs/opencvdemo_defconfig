@@ -1,7 +1,7 @@
 #
 # Automatically generated make config: don't edit
-# Buildroot 2011.05-mg00.1-00008-g59406e6-dirty Configuration
-# Sat Jan 28 19:21:45 2012
+# Buildroot 2011.05-mg00.1-00011-g7ff9d36-dirty Configuration
+# Sat Jan 28 20:08:04 2012
 #
 BR2_HAVE_DOT_CONFIG=y
 BR2_arm=y
@@ -240,7 +240,7 @@ BR2_PACKAGE_ALSA_UTILS_SPEAKER_TEST=y
 # BR2_PACKAGE_MPG123 is not set
 # BR2_PACKAGE_MPLAYER is not set
 # BR2_PACKAGE_MUSEPACK is not set
-BR2_PACKAGE_OPENCVTEMPMATCH=y
+BR2_PACKAGE_OPENCV_TEMPLATEMATCH=y
 # BR2_PACKAGE_SPEEX is not set
 # BR2_PACKAGE_SWFDEC is not set
 # BR2_PACKAGE_TIDSP_BINARIES is not set

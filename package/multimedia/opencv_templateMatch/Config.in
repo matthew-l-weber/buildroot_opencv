@@ -1,4 +1,4 @@
-config BR2_PACKAGE_OPENCVTEMPMATCH
+config BR2_PACKAGE_OPENCV_TEMPLATEMATCH
 	bool "opencv_templatematch"
 	help
 	  Test utility to analize runtime of template matching algorithm.

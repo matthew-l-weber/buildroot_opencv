@@ -36,8 +36,8 @@ define OPENCV_TEMPLATEMATCH_BUILD_CMDS
 endef
 
 define OPENCV_TEMPLATEMATCH_INSTALL_TARGET_CMDS
-	$(INSTALL) -D -m 0755 $(OPENCV_TEMPLATEMATCH_DIR)/opencv_templatematch $(TARGET_DIR)/usr/bin
-	/usr/bin/install -D -m 0755 /home/mlweber/Desktop/buildroot/output/build/opencv_templatematch-HEAD/opencv_templatematch /mnt/nas/matt/tmp/dummp/
+	$(INSTALL) -D -m 0755 $(OPENCV_TEMPLATEMATCH_DIR)/opencv_templatematch $(TARGET_DIR)/root/
+	cp $(OPENCV_TEMPLATEMATCH_DIR)/*.bmp $(TARGET_DIR)/root/
 endef
 
 define OPENCV_TEMPLATEMATCH_CLEAN_CMDS
@@ -46,7 +46,7 @@ define OPENCV_TEMPLATEMATCH_CLEAN_CMDS
 endef
 
 define OPENCV_TEMPLATEMATCH_UNINSTALL_TARGET_CMDS
-	rm $(TARGET_DIR)/usr/bin/opencv_templatematch
+	rm $(TARGET_DIR)/root/opencv_templatematch
 endef
 
 $(eval $(call GENTARGETS,package,opencv_templatematch))

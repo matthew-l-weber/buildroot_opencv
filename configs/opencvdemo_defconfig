@@ -1,7 +1,7 @@
 #
 # Automatically generated make config: don't edit
-# Buildroot 2011.05-mg00.1-00004-gc0ced14-dirty Configuration
-# Sun Jan 22 11:51:23 2012
+# Buildroot 2011.05-mg00.1-00008-g59406e6-dirty Configuration
+# Sat Jan 28 19:21:45 2012
 #
 BR2_HAVE_DOT_CONFIG=y
 BR2_arm=y
@@ -83,9 +83,9 @@ BR2_STRIP_strip=y
 # BR2_STRIP_none is not set
 # BR2_OPTIMIZE_0 is not set
 # BR2_OPTIMIZE_1 is not set
-# BR2_OPTIMIZE_2 is not set
+BR2_OPTIMIZE_2=y
 # BR2_OPTIMIZE_3 is not set
-BR2_OPTIMIZE_S=y
+# BR2_OPTIMIZE_S is not set
 # BR2_PREFER_STATIC_LIB is not set
 # BR2_HAVE_DOCUMENTATION is not set
 # BR2_HAVE_DEVFILES is not set

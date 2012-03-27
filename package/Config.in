@@ -417,6 +417,7 @@ endif
 source "package/netplug/Config.in"
 source "package/netsnmp/Config.in"
 source "package/netstat-nat/Config.in"
+source "package/netsurf/Config.in"
 source "package/nfs-utils/Config.in"
 source "package/ngircd/Config.in"
 source "package/ntp/Config.in"
